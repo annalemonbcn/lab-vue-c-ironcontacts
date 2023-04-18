@@ -1,24 +1,26 @@
 <template>
   <h1>IronContacts</h1>
   
-  <button @click="_addRandomContact">Add random contact</button>
-  <button @click="_sortByPopularity">Sort by popularity</button>
-  <button @click="_sortByName">Sort by name</button>
+  <button class="action" @click="_addRandomContact">Add random contact</button>
+  <button class="action" @click="_sortByPopularity">Sort by popularity</button>
+  <button class="action" @click="_sortByName">Sort by name</button>
 
   <table>
     <tr>
       <th>Picture</th>
       <th>Name</th>
       <th>Popularity</th>
-      <th>Won Oscar</th>
-      <th>Won Emmy</th>
+      <th>Won<br>Oscar</th>
+      <th>Won<br>Emmy</th>
+      <th>Actions</th>
     </tr>
-    <tr v-for="(contact, index) in contacts" :key="index">
+    <tr v-for="(contact, index) in renderedContacts" :key="index">
       <td><img :src="contact.pictureUrl" :alt="`${contact.name} picture`" /></td>
       <td>{{ contact.name }}</td>
       <td>{{ contact.popularity }}</td>
       <td><span v-show="contact.wonOscar">🏆</span></td>
-      <td><span v-show="contact.wonEmmy">🏆</span></td>
+      <td><span v-show="contact.wonEmmy">✨</span></td>
+      <td><button @click="_deleteContact(contact)">Delete</button></td>
     </tr>
   </table>
 </template>
@@ -30,20 +32,20 @@ export default {
   name: "App",
   data() {
     return {
-      contacts: [],
+      renderedContacts: [],
       initialContacts: 5,
       sortBy: null
     };
   },
   methods: {
     _addRandomContact(){
-      // Generate random index
-      const randomIndex = Math.floor(Math.random()*contacts.length);
+      const randomIndex = Math.floor(Math.random() * contacts.length);
+      const randomContact = contacts[randomIndex];
+      const contactExists = this.renderedContacts.find(contact => contact.name === randomContact.name);
 
-      // Check if the index is not in this.contacts already (index >= 5)
-      if(randomIndex >= this.initialContacts){
-        this.contacts.push(contacts[randomIndex]);
-        console.log(contacts[randomIndex].name);
+      // Check if the randomContact is not in this.renderedContacts 
+      if (!contactExists) {
+        this.renderedContacts.push(randomContact);
         if(this.sortBy === 'name'){
           this._sortByName();
         }
@@ -51,28 +53,41 @@ export default {
           this._sortByPopularity();
         }
       }
-      // If index < 5, execute the function again
+      // If randomContact is in this.renderedContacts, execute the function again
       else {
         this._addRandomContact();
       }
     },
     _sortByPopularity(){
-      this.contacts.sort((a, b) => b.popularity - a.popularity);
+      this.renderedContacts.sort((a, b) => b.popularity - a.popularity);
       this.sortBy = 'popularity';
     },
     _sortByName(){
-      this.contacts.sort((a, b) => a.name.localeCompare(b.name));
+      this.renderedContacts.sort((a, b) => a.name.localeCompare(b.name));
       this.sortBy = 'name';
+    },
+    _getContact(){
+
+    },
+    _deleteContact(contactToDelete){
+      const indexToDelete = this.renderedContacts.findIndex(contact => contact.name === contactToDelete.name);
+
+      if (indexToDelete !== -1) {
+        this.renderedContacts.splice(indexToDelete, 1);
+      }
     }
   },
   created() {
-    // this._getContacts();
-    this.contacts = contacts.slice(0, this.initialContacts);
+    this.renderedContacts = contacts.slice(0, this.initialContacts);
   },
 };
 </script>
 
 <style scoped>
+  button.action{
+    margin: 0 5px;;
+  }
+
   table{
     text-align: center;
   }
@@ -84,4 +99,5 @@ export default {
   table img{
     width: 100px;
   }
+  
 </style>
